@@ -1,2 +1,2 @@
 # berry-battle-server
-Simulation engine that runs on a server and officiates a Berry Battle between two Raspberry Pi 5s 
+Berry Battle Server is a server side game simulator that officiates a match between two user defined AI algorithms executing on Raspberry Pi devices
