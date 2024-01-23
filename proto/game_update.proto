@@ -1,18 +1,9 @@
 syntax = "proto3";
 
-package hello;
+package game_server;
 
-// The greeting service definition.
-service Say {
-  rpc Send (SayRequest) returns (SayResponse) {}
-}
+import "game_data.proto";
 
-// The request message containing the user's name.
-message SayRequest {
-  string name = 1;
-}
-
-// The response message containing the greetings
-message SayResponse {
-  string message = 1;
+service UpdateGameState {
+  rpc Update (UpdateStateRequest) returns (UpdatedStateResponse);
 }

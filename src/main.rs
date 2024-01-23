@@ -1,38 +1,26 @@
-use tonic::{transport::Server, Request, Response, Status};
+use game_server::update_game_state_client::UpdateGameStateClient;
+use game_server::{UpdateStateRequest, UpdateStatus};
+use prost_types::Timestamp;
 
-use crate::hello::say_server::{Say, SayServer};
-use hello::{SayRequest, SayResponse};
-
-pub mod hello {
-    tonic::include_proto!("hello");
-}
-
-#[derive(Default)]
-pub struct MySay {}
-
-#[tonic::async_trait]
-impl Say for MySay {
-    async fn send(&self, request: Request<SayRequest>) -> Result<Response<SayResponse>, Status> {
-        println!("Got a request from {:?}", request.remote_addr());
-
-        let reply = SayResponse {
-            message: format!("Hello {}!", request.get_ref().name),
-        };
-        Ok(Response::new(reply))
-    }
+pub mod game_server {
+    tonic::include_proto!("game_server");
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "[::1]:50051".parse().unwrap();
+    let mut client = UpdateGameStateClient::connect("http://[::1]:50051").await?;
 
-    println!("Server listening on {}", addr);
+    let request = tonic::Request::new(UpdateStateRequest {
+        // name: "Tonic".into(),
+        status: UpdateStatus::Finished as i32,
+        update_id: "1234".into(),
+        timestamp: Some(Timestamp::default()),
+        data: "Blob".into(),
+    });
 
-    let say = MySay::default();
-    Server::builder()
-        .add_service(SayServer::new(say))
-        .serve(addr)
-        .await?;
+    let response = client.update(request).await?;
+
+    println!("RESPONSE={:?}", response);
 
     Ok(())
 }

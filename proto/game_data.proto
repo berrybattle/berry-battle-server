@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package game_server;
+
+import "google/protobuf/timestamp.proto";
+
+enum UpdateStatus {
+      PROCESSING = 0;
+      FINISHED = 1;
+}
+
+message UpdateStateRequest {
+      UpdateStatus status = 1;
+      string update_id = 2;
+      google.protobuf.Timestamp timestamp = 3;
+      string data = 4;
+}
+
+message UpdatedStateResponse {
+      UpdateStatus updated_status = 1;
+      string update_id = 2;
+      google.protobuf.Timestamp timestamp = 3;
+      string updated_data = 4;
+}
