@@ -1,25 +1,22 @@
 use tonic::{transport::Server, Request, Response, Status};
 
-use hello_world::greeter_server::{Greeter, GreeterServer};
-use hello_world::{HelloReply, HelloRequest};
+use crate::hello::say_server::{Say, SayServer};
+use hello::{SayRequest, SayResponse};
 
-pub mod hello_world {
-    tonic::include_proto!("helloworld");
+pub mod hello {
+    tonic::include_proto!("hello");
 }
 
 #[derive(Default)]
-pub struct MyGreeter {}
+pub struct MySay {}
 
 #[tonic::async_trait]
-impl Greeter for MyGreeter {
-    async fn say_hello(
-        &self,
-        request: Request<HelloRequest>,
-    ) -> Result<Response<HelloReply>, Status> {
+impl Say for MySay {
+    async fn send(&self, request: Request<SayRequest>) -> Result<Response<SayResponse>, Status> {
         println!("Got a request from {:?}", request.remote_addr());
 
-        let reply = hello_world::HelloReply {
-            message: format!("Hello {}!", request.into_inner().name),
+        let reply = SayResponse {
+            message: format!("Hello {}!", request.get_ref().name),
         };
         Ok(Response::new(reply))
     }
@@ -28,12 +25,12 @@ impl Greeter for MyGreeter {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse().unwrap();
-    let greeter = MyGreeter::default();
 
-    println!("GreeterServer listening on {}", addr);
+    println!("Server listening on {}", addr);
 
+    let say = MySay::default();
     Server::builder()
-        .add_service(GreeterServer::new(greeter))
+        .add_service(SayServer::new(say))
         .serve(addr)
         .await?;
 
