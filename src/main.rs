@@ -54,63 +54,57 @@ mod tests {
 
     fn generate_update_state_request(
         unit_count: usize,
-        stress_multiple: u32,
+        processing_time_ns: u64,
     ) -> UpdateStateRequest {
         let mut rng = thread_rng();
         UpdateStateRequest {
             status: UpdateStatus::Processing as i32,
             update_id: rng.gen::<u32>(),
             units: generate_sample_units(unit_count),
-            multiplier: stress_multiple,
+            per_unit_proc_time_ns: processing_time_ns,
         }
     }
 
-    struct Results {
-        step_count: usize,
-        multiple: u32,
+    struct Output {
+        unit_count: usize,
         on_chip_processing_time_us: u64,
         round_trip_latency_us: u128,
     }
 
-    impl fmt::Display for Results {
+    impl fmt::Display for Output {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             write!(
                 f,
-                "{:>21} |{:>21} |{:>21} |{:>21} |",
-                self.step_count,
-                self.multiple,
-                self.on_chip_processing_time_us,
-                self.round_trip_latency_us
+                "{:>11} |{:>21} |{:>13} |",
+                self.unit_count, self.on_chip_processing_time_us, self.round_trip_latency_us
             )
         }
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn test_node_performance() {
-        let unit_counts = (0..=200).step_by(10).collect::<Vec<usize>>();
-        let stress_ratings = (0..=20).step_by(1).collect::<Vec<u32>>();
-        println!("      Step Count      |    Stress Multiple   | Processing Time (us) |      Latency (us)    |");
-        for unit in unit_counts.iter() {
-            for stress_multiple in stress_ratings.iter() {
-                let current_state = generate_update_state_request(*unit, *stress_multiple);
+        let processing_time_ns = 100000;
+        let team_sizes = (0..=200).step_by(10).collect::<Vec<usize>>();
+        let mut results: Vec<Output> = vec![];
+        for unit_count in team_sizes {
+            let current_state = generate_update_state_request(unit_count, processing_time_ns);
 
-                let start = std::time::Instant::now();
-                let response = request_updates(current_state).await.unwrap();
-                let round_trip_latency_us = start.elapsed().as_micros();
+            let start = std::time::Instant::now();
+            let response = request_updates(current_state).await.unwrap();
+            let round_trip_latency_us = start.elapsed().as_micros();
 
-                let on_chip_processing_time_us =
-                    response.single_pass_elapsed_time_us * (*stress_multiple as u64);
-
-                println!(
-                    "{}",
-                    Results {
-                        step_count: *unit,
-                        multiple: *stress_multiple,
-                        on_chip_processing_time_us,
-                        round_trip_latency_us
-                    }
-                );
-            }
+            results.push(Output {
+                unit_count,
+                on_chip_processing_time_us: response.single_pass_elapsed_time_us,
+                round_trip_latency_us,
+            });
         }
+        println!("To simulate unit processing e.g. running A* etc on each unit");
+        println!(
+            "we will be using a constant processing time of {}ns per unit",
+            processing_time_ns
+        );
+        println!(" Unit Count | Processing Time (us) | Latency (us) |");
+        results.iter().for_each(|r| println!("{}", r));
     }
 }

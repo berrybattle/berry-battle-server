@@ -38,13 +38,13 @@ message UpdateStateRequest {
       UpdateStatus status = 1;
       uint32 update_id = 2;
       repeated UnitState units = 3;
-      uint32 multiplier = 4;
+      uint64 per_unit_proc_time_ns = 4;
 }
 
 message UpdatedStateResponse {
       UpdateStatus updated_status = 1;
       uint32 update_id = 2;
       repeated UnitState units = 3;
-      uint32 multiplier = 4;
+      uint64 per_unit_proc_time_ns = 4;
       uint64 single_pass_elapsed_time_us = 5;
 }
