@@ -101,10 +101,10 @@ mod tests {
         }
         println!("To simulate unit processing e.g. running A* etc on each unit");
         println!(
-            "we will be using a constant processing time of {}ns per unit",
+            "Apply constant processing time of {}ns per unit",
             processing_time_ns
         );
         println!(" Unit Count | Processing Time (us) | Latency (us) |");
-        results.iter().for_each(|r| println!("{}", r));
+        results.iter().for_each(|x| println!("{}", x));
     }
 }
