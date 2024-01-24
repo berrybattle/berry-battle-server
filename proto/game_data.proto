@@ -46,5 +46,5 @@ message UpdatedStateResponse {
       uint32 update_id = 2;
       repeated UnitState units = 3;
       uint32 multiplier = 4;
-      uint64 single_pass_elapsed_time = 5;
+      uint64 single_pass_elapsed_time_us = 5;
 }
