@@ -2,23 +2,49 @@ syntax = "proto3";
 
 package game_server;
 
-import "google/protobuf/timestamp.proto";
-
 enum UpdateStatus {
       PROCESSING = 0;
       FINISHED = 1;
 }
 
+enum UnitType {
+      UNKNOWN = 0;
+      MOBILE = 1;
+      STATIC = 2;
+}
+
+message UnitDirectionVector {
+      float x = 1;
+      float y = 2;
+}
+
+message UnitPosition {
+      float x = 1;
+      float y = 2;
+      uint32 layer = 3;
+      UnitDirectionVector direction = 4;
+}
+
+message UnitState {
+      uint32 id = 1;
+      UnitType unit_type = 2;
+      UnitPosition position = 3;
+      string tag = 4;
+}
+
 message UpdateStateRequest {
+// Make sure to reserve field numbers if they are removed
+// https://protobuf.dev/programming-guides/proto3/#fieldreserved
       UpdateStatus status = 1;
-      string update_id = 2;
-      google.protobuf.Timestamp timestamp = 3;
-      string data = 4;
+      uint32 update_id = 2;
+      repeated UnitState units = 3;
+      uint32 multiplier = 4;
 }
 
 message UpdatedStateResponse {
       UpdateStatus updated_status = 1;
-      string update_id = 2;
-      google.protobuf.Timestamp timestamp = 3;
-      string updated_data = 4;
+      uint32 update_id = 2;
+      repeated UnitState units = 3;
+      uint32 multiplier = 4;
+      uint64 single_pass_elapsed_time = 5;
 }
