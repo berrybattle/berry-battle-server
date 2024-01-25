@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package game_server;
+package bb_grpc;
 
 enum UpdateStatus {
       PROCESSING = 0;
@@ -32,7 +32,7 @@ message UnitState {
       string tag = 4;
 }
 
-message UpdateStateRequest {
+message UpdateRpcRequest {
 // Make sure to reserve field numbers if they are removed
 // https://protobuf.dev/programming-guides/proto3/#fieldreserved
       UpdateStatus status = 1;
@@ -41,7 +41,7 @@ message UpdateStateRequest {
       uint64 per_unit_proc_time_ns = 4;
 }
 
-message UpdatedStateResponse {
+message UpdateRpcResponse {
       UpdateStatus updated_status = 1;
       uint32 update_id = 2;
       repeated UnitState units = 3;

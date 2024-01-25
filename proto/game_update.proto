@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-package game_server;
-
-import "game_data.proto";
-
-service UpdateGameState {
-  rpc Update (UpdateStateRequest) returns (UpdatedStateResponse);
-}

@@ -1,8 +1,8 @@
-use game_server::update_game_state_client::UpdateGameStateClient;
-use game_server::{UpdateStateRequest, UpdatedStateResponse};
+use bb_grpc::update_service_client::UpdateServiceClient;
+use bb_grpc::{UpdateRpcRequest, UpdateRpcResponse};
 
-pub mod game_server {
-    tonic::include_proto!("game_server");
+pub mod bb_grpc {
+    tonic::include_proto!("bb_grpc");
 }
 
 #[tokio::main]
@@ -11,11 +11,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn request_updates(
-    current_state: UpdateStateRequest,
-) -> Result<UpdatedStateResponse, Box<dyn std::error::Error>> {
-    let mut client = UpdateGameStateClient::connect("http://[::1]:50051").await?;
+    current_state: UpdateRpcRequest,
+) -> Result<UpdateRpcResponse, Box<dyn std::error::Error>> {
+    let mut client = UpdateServiceClient::connect("http://[::1]:50051").await?;
 
-    match client.update(current_state).await {
+    match client.update_rpc(current_state).await {
         Ok(response) => Ok(response.into_inner()),
         Err(e) => Err(Box::new(e)),
     }
@@ -25,8 +25,8 @@ async fn request_updates(
 #[allow(non_snake_case)]
 mod tests {
     use super::*;
-    use game_server::{
-        UnitDirectionVector, UnitPosition, UnitState, UnitType, UpdateStateRequest, UpdateStatus,
+    use bb_grpc::{
+        UnitDirectionVector, UnitPosition, UnitState, UnitType, UpdateRpcRequest, UpdateStatus,
     };
     use rand::thread_rng;
     use rand::Rng;
@@ -55,9 +55,9 @@ mod tests {
     fn generate_update_state_request(
         unit_count: usize,
         processing_time_ns: u64,
-    ) -> UpdateStateRequest {
+    ) -> UpdateRpcRequest {
         let mut rng = thread_rng();
-        UpdateStateRequest {
+        UpdateRpcRequest {
             status: UpdateStatus::Processing as i32,
             update_id: rng.gen::<u32>(),
             units: generate_sample_units(unit_count),
